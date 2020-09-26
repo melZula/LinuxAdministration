@@ -1,8 +1,10 @@
-#!bin/bash
+#!/bin/bash
 
-# 1
+# 1:
 cd $HOME
-mkdir test 2>>/dev/null
+if [[ ! -e test ]]; then
+	mkdir test
+fi
 
 # 2, 3
 numberOfDirectories=0
@@ -11,35 +13,34 @@ numberOfHiddenFiles=0
 for str in $(ls -a /etc)
 do
 	if [[ -d /etc/$str ]]; then
-		echo "$str is directory"
-		let numberOfDirectories=$numberOfDirectories+1
-		
+		echo "$str/"
 	elif [[ -f /etc/$str ]]; then
-		echo "$str is file"
-		if [[ $str = .* ]]; then
-			let numberOfHiddenFiles=$numberOfHiddenFiles+1
-		fi
+		echo "$str"
 	else
 		echo "Nothing"
 	fi
 done > $HOME/test/list
 
 # 3
-echo $numberOfDirectories >> $HOME/test/list
-echo $numberOfHiddenFiles >> $HOME/test/list
+ls -d /etc/*/ | wc -w >> $HOME/test/list
+ls -A /etc/ | grep -E "^\..*" | wc -w >> $HOME/test/list
 
 # 4
-mkdir $HOME/test/links 2>>/dev/null
+if [[ ! -e $HOME/test/links ]]; then
+	mkdir $HOME/test/links
+fi
 
-#5
-ln $HOME/test/list $HOME/test/links/list_hlink 2>>/dev/null
+# 5
+if [[ ! -e $HOME/test/links/list_hlink ]]; then
+	ln $HOME/test/list $HOME/test/links/list_hlink
+fi
 
-#6
-ln -s $HOME/test/list $HOME/test/links/list_slink 2>>/dev/null
+# 6
+if [[ ! -e $HOME/test/links/list_slink ]]; then
+	ln -s $HOME/test/list $HOME/test/links/list_slink
+fi
 
-#7
-# ls -l <file> prints detailed info about file, awk takes the second word and prints it
-# result: 2 2 1
+# 7
 echo "#7"
 echo "Number of hard links to list_hlink"
 ls -l $HOME/test/links/list_hlink | awk '{ print $2 }'
@@ -48,29 +49,32 @@ ls -l $HOME/test/list | awk '{ print $2 }'
 echo "Number of hard links to list_slink"
 ls -l $HOME/test/links/list_slink | awk '{ print $2 }'
 
-#8
+# 8
 wc $HOME/test/list | awk '{ print $1 }' >> $HOME/test/links/list_hlink
 
-#9
-# slink contains pointer to the original file, while hlink is the original file itself
+# 9
 echo "#9"
 cmp -s $HOME/test/links/list_hlink $HOME/test/links/list_slink && echo YES
 
-#10
+# 10
+echo "#10"
 mv $HOME/test/list $HOME/test/list1
 
-#11
+# 11
 echo "#11"
 cmp -s $HOME/test/links/list_hlink $HOME/test/links/list_slink && echo YES
 
-#12
-ln $HOME/test/links/list_hlink $HOME/list1 2>>/dev/null
+# 12
+echo "#12"
+if [[ ! -e $HOME/list1 ]]; then
+	ln $HOME/test/links/list_hlink $HOME/list1
+fi
 
 #13
-find /etc -type f -name *.conf > $HOME/list_conf 2>>/dev/null
+find /etc -type f -name *.conf > $HOME/list_conf
 
 #14
-find /etc -type d -name *.d > $HOME/list_d 2>>/dev/null
+find /etc -type d -name *.d > $HOME/list_d
 
 #15
 cat $HOME/list_conf > $HOME/list_conf_d
@@ -78,7 +82,9 @@ cat $HOME/list_d >> $HOME/list_conf_d
 
 #16
 cd $HOME/test
-mkdir .sub 2>>/dev/null
+if [[ ! -e .sub ]]; then
+	mkdir .sub
+fi
 
 #17
 cp $HOME/list_conf_d $HOME/test/.sub
@@ -95,12 +101,16 @@ man man > $HOME/man.txt
 
 #21
 cd $HOME
-mkdir man_parts 2>>/dev/null
+if [[ ! -e man_parts ]]; then
+	mkdir man_parts
+fi
 cd man_parts
 split -b 1k ../man.txt
 
 #22
-mkdir $HOME/man.dir 2>>/dev/null
+if [[ ! -e $HOME/man.dir ]]; then
+	mkdir $HOME/man.dir
+fi
 
 #23
 mv $HOME/man_parts/x* $HOME/man.dir
