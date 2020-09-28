@@ -38,4 +38,18 @@ chmod +x /mnt/newdisk/ololo/test
 /mnt/newdisk/ololo/test
 
 #10
+umount /dev/vdb1
+fdisk /dev/vdb
+d
+1
+n
+p
+1
++350M
+w
+
+#11
+fsck -n /dev/vdb1
+
+#12
 
